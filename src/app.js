@@ -48,9 +48,22 @@ export function createApp() {
     ];
 
     root.innerHTML = `
+    <div class="pack-intro" id="packIntro">
+      <div class="pack-idle">
+        <div class="pack-bubble" id="packBubble">
+          <img class="pack-frame" id="packFrame" src="${base}assets/pack/pack_1.png" alt="" />
+        </div>
+      </div>
+      <p class="pack-hint" id="packHint">CLICK TO OPEN ...</p>
+    </div>
+
     <div class="crt"></div>
 
     <div class="particles" id="particles"></div>
+
+    <audio id="packSfx" preload="auto">
+      <source src="${base}audio/sfx.mp3" type="audio/mpeg" />
+    </audio>
 
     <audio id="bgm" loop preload="auto">
       <source src="${base}audio/bgm.mp3" type="audio/mpeg" />
@@ -232,6 +245,115 @@ export function createApp() {
     const layers = root.querySelectorAll(".layer");
     const particles = root.querySelector("#particles");
 
+    /* =========================
+       PACK OPENING INTRO
+    ========================= */
+
+    const PACK_PEEL_FRAMES = 6;
+
+    const packIntro = root.querySelector("#packIntro");
+    const packFrame = root.querySelector("#packFrame");
+    const packBubble = root.querySelector("#packBubble");
+    const packHint = root.querySelector("#packHint");
+    const packSfx = root.querySelector("#packSfx");
+
+    document.body.classList.add("intro-lock");
+
+    let packStep = 1;
+    let packBusy = false;
+    let packSfxAvailable = true;
+
+    packSfx.addEventListener(
+        "error",
+        () => {
+            packSfxAvailable = false;
+        },
+        { once: true }
+    );
+
+    function packFrameSrc(n) {
+        return `${base}assets/pack/pack_${n}.png`;
+    }
+
+    function packHintText(step) {
+        if (step <= 1) return "CLICK TO OPEN ...";
+        if (step <= 3) return "AGAIN!";
+        if (step <= 5) return "KEEP GOING!!";
+        return "ALMOST THERE!!!";
+    }
+
+    // preload every frame up front so the flicker sequence never stalls waiting on the network
+    for (let i = 1; i <= 8; i += 1) {
+        new Image().src = packFrameSrc(i);
+    }
+
+    function playPackSfx() {
+        if (!packSfxAvailable) return;
+
+        packSfx.currentTime = 0;
+        packSfx.play().catch(() => { });
+    }
+
+    function bubblePack() {
+        packBubble.classList.remove("is-bubbling");
+        void packBubble.offsetWidth;
+        packBubble.classList.add("is-bubbling");
+    }
+
+    function wobblePack() {
+        const angle = (Math.random() * 2 - 1) * 6; // small random tilt, -6deg..6deg
+        packFrame.style.rotate = `${angle.toFixed(2)}deg`;
+    }
+
+    function tearFeedback() {
+        bubblePack();
+        wobblePack();
+        playPackSfx();
+
+        if (navigator.vibrate) navigator.vibrate(30);
+    }
+
+    packIntro.addEventListener("click", () => {
+        if (packBusy) return;
+
+        if (packStep < PACK_PEEL_FRAMES) {
+            packStep += 1;
+            packFrame.src = packFrameSrc(packStep);
+            packHint.textContent = packHintText(packStep);
+            tearFeedback();
+            return;
+        }
+
+        // last peel frame reached: flicker a few times, then reveal the card
+        packBusy = true;
+        packHint.style.opacity = "0";
+        tearFeedback();
+
+        let flickerCount = 0;
+        const totalFlickers = 8;
+
+        const flickerTimer = setInterval(() => {
+            packFrame.src = packFrameSrc(flickerCount % 2 === 0 ? 7 : 8);
+            flickerCount += 1;
+
+            if (flickerCount >= totalFlickers) {
+                clearInterval(flickerTimer);
+
+                // snap to a solid white flash (matches pack_7) before revealing the CRT scene beneath,
+                // instead of cross-fading two different textured backgrounds at once
+                packIntro.classList.add("is-flash");
+
+                setTimeout(() => {
+                    packIntro.classList.add("is-done");
+                    document.body.classList.remove("intro-lock");
+                    playMusic();
+
+                    setTimeout(() => packIntro.remove(), 800);
+                }, 200);
+            }
+        }, 120);
+    });
+
     let flipped = false;
 
     let currentRotateX = 0;
@@ -372,11 +494,8 @@ export function createApp() {
 
         bgm.play()
             .then(() => musicToggle.classList.add("is-playing"))
-            .catch(() => {});
+            .catch(() => { });
     }
-
-    document.addEventListener("click", playMusic, { once: true });
-    document.addEventListener("touchstart", playMusic, { once: true });
 
     musicToggle.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -472,7 +591,7 @@ export function createApp() {
                 .then((state) => {
                     if (state === "granted") enableTilt();
                 })
-                .catch(() => {});
+                .catch(() => { });
         } else if (typeof DeviceOrientationEvent !== "undefined") {
             enableTilt();
         }
