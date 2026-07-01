@@ -2,121 +2,184 @@ export function createApp() {
     const root = document.createElement("div");
     root.className = "page";
 
+    const base = import.meta.env.BASE_URL;
+
+    // bounding box (as % of card size) of the visible art for each
+    // hoverable/clickable layer, measured from the source PNGs
+    const HOTSPOTS = [
+        { name: "time", depth: 15, left: 7.6, top: 60.5, width: 84.8, height: 10.6, clickable: false },
+        { name: "place", depth: 15, left: 7.6, top: 71.9, width: 84.8, height: 13.3, clickable: true, url: "https://maps.app.goo.gl/DykkSuYtAH812LDj8" },
+        { name: "contact", depth: 15, left: 7.6, top: 85.9, width: 84.8, height: 10.2, clickable: true, url: "https://www.instagram.com/baluong.87/" },
+        { name: "cert", depth: 20, left: 26.4, top: 41.4, width: 59.7, height: 14.8, clickable: false },
+        { name: "thesis", depth: 20, left: 11.8, top: 14.1, width: 41.0, height: 27.7, clickable: true, url: "https://drive.google.com/file/d/1Kyrs-VM9R2ixIq7JDuiTPRZQJ5wuVgIa/view?usp=sharing" },
+        { name: "laptop", depth: 20, left: 11.1, top: 18.8, width: 77.8, height: 31.2, clickable: false },
+    ];
+
     root.innerHTML = `
     <div class="crt"></div>
 
     <div class="particles" id="particles"></div>
 
-    <div class="scene">
-      <div class="card-wrapper">
+    <section class="section-card">
+      <div class="scene">
+        <div class="card-wrapper">
 
-        <div class="idle-float">
+          <div class="idle-float">
 
-            <div class="bubble-wrapper" id="bubble">
+              <div class="bubble-wrapper" id="bubble">
 
-                <div class="card" id="card">
+                  <div class="card" id="card">
 
-                    <!-- BACK -->
-                    <div class="face back">
+                      <!-- BACK -->
+                      <div class="face back">
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/back/frame.png"
-                        class="layer"
-                        data-depth="10"
-                        />
+                          <img
+                          src="${base}assets/back/frame.png"
+                          class="layer"
+                          data-depth="10"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/back/bg.png"
-                        class="layer"
-                        data-depth="12.5"
-                        />
+                          <img
+                          src="${base}assets/back/bg.png"
+                          class="layer"
+                          data-depth="12.5"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/back/detail.png"
-                        class="layer"
-                        data-depth="15"
-                        />            
+                          <img
+                          src="${base}assets/back/detail.png"
+                          class="layer"
+                          data-depth="15"
+                          />
 
-                    </div>
+                      </div>
 
-                    <!-- FRONT -->
-                    <div class="face front">
+                      <!-- FRONT -->
+                      <div class="face front">
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/frame.png"
-                        class="layer"
-                        data-depth="10"
-                        />
+                          <img
+                          src="${base}assets/front/frame.png"
+                          class="layer"
+                          data-depth="10"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/bg.png"
-                        class="layer"
-                        data-depth="12.5"
-                        />
+                          <img
+                          src="${base}assets/front/bg.png"
+                          class="layer"
+                          data-depth="12.5"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/title.png"
-                        class="layer"
-                        data-depth="15"
-                        />
+                          <img
+                          src="${base}assets/front/title.png"
+                          class="layer"
+                          data-depth="15"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/time.png"
-                        class="layer"
-                        data-depth="15"
-                        />
+                          <img
+                          src="${base}assets/front/time.png"
+                          class="layer"
+                          data-depth="15"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/place.png"
-                        class="layer"
-                        data-depth="15"
-                        />
+                          <img
+                          src="${base}assets/front/place.png"
+                          class="layer"
+                          data-depth="15"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/contact.png"
-                        class="layer"
-                        data-depth="15"
-                        />
+                          <img
+                          src="${base}assets/front/contact.png"
+                          class="layer"
+                          data-depth="15"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/in_bg.png"
-                        class="layer"
-                        data-depth="17.5"
-                        />
+                          <img
+                          src="${base}assets/front/in_bg.png"
+                          class="layer"
+                          data-depth="17.5"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/cert.png"
-                        class="layer"
-                        data-depth="20"
-                        />
+                          <img
+                          src="${base}assets/front/cert.png"
+                          class="layer"
+                          data-depth="20"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/thesis.png"
-                        class="layer"
-                        data-depth="20"
-                        />
+                          <img
+                          src="${base}assets/front/thesis.png"
+                          class="layer"
+                          data-depth="20"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/laptop.png"
-                        class="layer"
-                        data-depth="20"
-                        />
+                          <img
+                          src="${base}assets/front/laptop.png"
+                          class="layer"
+                          data-depth="20"
+                          />
 
-                        <img
-                        src="${import.meta.env.BASE_URL}assets/front/top.png"
-                        class="layer"
-                        data-depth="20"
-                        />
+                          <img
+                          src="${base}assets/front/top.png"
+                          class="layer"
+                          data-depth="20"
+                          />
 
-                    </div>
+                          ${HOTSPOTS.map(
+        (h) => `
+                          <img
+                          src="${base}assets/front/${h.name}_hover.png"
+                          class="layer hover-layer"
+                          data-depth="${h.depth}"
+                          data-hover-for="${h.name}"
+                          />`
+    ).join("")}
 
-                </div>
-            
-            </div>
+                          <div class="hotspots">
+                              ${HOTSPOTS.map(
+        (h) => `
+                              <div
+                              class="hotspot${h.clickable ? " is-clickable" : ""}"
+                              data-target="${h.name}"
+                              data-clickable="${h.clickable}"
+                              data-url="${h.url ?? ""}"
+                              style="left:${h.left}%; top:${h.top}%; width:${h.width}%; height:${h.height}%;"
+                              ></div>`
+    ).join("")}
+                          </div>
 
+                      </div>
+
+                  </div>
+
+              </div>
+
+          </div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <section class="section-invite">
+      <div class="invite-content">
+        <p class="invite-heading">Thư mời &bull; Tham dự</p>
+        <h2 class="invite-title">LỄ TỐT NGHIỆP</h2>
+        <p class="invite-heading">của</p>
+        <h3 class="invite-name">Bá Lương</h3>
+
+        <div class="invite-details">
+          <p><strong>Thời gian:</strong> 08h30 &bull; Ngày 05/07/2026</p>
+          <p><strong>Địa điểm:</strong> Hội trường Nguyễn Văn Đạo<br />(144 Xuân Thuỷ, Cầu Giấy, Hà Nội)</p>
+        </div>
+
+        <p class="invite-message">
+          "Sự hiện diện của bạn là niềm hạnh phúc của tôi.<br />
+          Rất mong bạn có mặt trong buổi lễ tốt nghiệp này."
+        </p>
+
+        <p class="invite-signoff">Thân ái.</p>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <a href="https://github.com/anhsuplo-87" target="_blank" rel="noopener noreferrer">baluong.87</a>
+    </footer>
   `;
 
     const card = root.querySelector("#card");
@@ -157,6 +220,50 @@ export function createApp() {
 
         particles.appendChild(p);
     }
+
+    /* =========================
+       HOTSPOTS (hover / click layers)
+    ========================= */
+
+    const hoverLayers = new Map();
+
+    root.querySelectorAll(".hover-layer").forEach((img) => {
+        hoverLayers.set(img.dataset.hoverFor, img);
+
+        img.addEventListener(
+            "error",
+            () => {
+                img.dataset.missing = "true";
+            },
+            { once: true }
+        );
+    });
+
+    root.querySelectorAll(".hotspot").forEach((hotspot) => {
+        const hoverImg = hoverLayers.get(hotspot.dataset.target);
+
+        hotspot.addEventListener("mouseenter", () => {
+            if (hoverImg && hoverImg.dataset.missing !== "true") {
+                hoverImg.style.opacity = "1";
+            }
+        });
+
+        hotspot.addEventListener("mouseleave", () => {
+            if (hoverImg) hoverImg.style.opacity = "0";
+        });
+
+        if (hotspot.dataset.clickable === "true") {
+            hotspot.addEventListener("click", (e) => {
+                e.stopPropagation();
+
+                const url = hotspot.dataset.url;
+
+                if (url && url !== "#") {
+                    window.open(url, "_blank", "noopener,noreferrer");
+                }
+            });
+        }
+    });
 
     /* =========================
        CLICK/FLIP

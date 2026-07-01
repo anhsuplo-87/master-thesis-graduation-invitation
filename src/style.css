@@ -1,3 +1,13 @@
+@font-face {
+  font-family: "Public Pixel";
+  src:
+    url("/fonts/PublicPixel.otf") format("opentype"),
+    url("/fonts/PublicPixel.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -8,14 +18,19 @@ html,
 body,
 #app {
   width: 100%;
-  height: 100%;
-  overflow: hidden;
-  background: #040507;
   font-family: sans-serif;
 }
 
 body {
   position: relative;
+
+  background:
+    radial-gradient(
+      circle at center,
+      #1b2030 0%,
+      #090b10 70%
+    )
+    fixed;
 }
 
 /* =========================
@@ -137,7 +152,32 @@ body {
 
 .page {
   width: 100%;
-  height: 100%;
+
+  position: relative;
+}
+
+/* =========================
+   SECTION: CARD
+========================= */
+
+.section-card {
+  width: 100%;
+  height: 100vh;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================
+   SECTION: INVITE
+========================= */
+
+.section-invite {
+  width: 100%;
+  min-height: 100vh;
 
   position: relative;
 
@@ -145,12 +185,92 @@ body {
   align-items: center;
   justify-content: center;
 
-  background:
-    radial-gradient(
-      circle at center,
-      #1b2030 0%,
-      #090b10 70%
-    );
+  padding: 100px 24px;
+}
+
+.invite-content {
+  max-width: 560px;
+
+  text-align: center;
+
+  color: #f1e4c6;
+
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.invite-heading {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.invite-title {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(20px, 5vw, 28px);
+  letter-spacing: 4px;
+  line-height: 1.8;
+  color: #f4c869;
+
+  margin: 18px 0;
+
+  text-shadow: 0 0 20px rgba(244, 200, 105, 0.45);
+}
+
+.invite-name {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: clamp(16px, 4vw, 20px);
+  letter-spacing: 3px;
+  line-height: 1.8;
+  color: #ffffff;
+
+  margin-bottom: 28px;
+}
+
+.invite-details p {
+  margin: 10px 0;
+}
+
+.invite-details strong {
+  color: #f4c869;
+}
+
+.invite-message {
+  margin: 32px 0 14px;
+  font-style: italic;
+}
+
+.invite-signoff {
+  opacity: 0.85;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.site-footer {
+  width: 100%;
+
+  padding: 28px 24px;
+
+  text-align: center;
+
+  font-family: "Public Pixel", "IBM Plex Mono", monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #6d7280;
+}
+
+.site-footer a {
+  color: #f4c869;
+  text-decoration: none;
+}
+
+.site-footer a:hover {
+  text-decoration: underline;
 }
 
 /* =========================
@@ -426,6 +546,35 @@ body {
   user-select: none;
 
   will-change: transform;
+}
+
+/* =========================
+   HOTSPOTS (hover / click layers)
+========================= */
+
+.hover-layer {
+  opacity: 0;
+
+  transition: opacity 0.25s ease;
+
+  filter: drop-shadow(0 0 10px rgba(255, 225, 150, 0.75));
+}
+
+.hotspots {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+}
+
+.hotspot {
+  position: absolute;
+
+  pointer-events: auto;
+}
+
+.hotspot.is-clickable {
+  cursor: pointer;
 }
 
 /* =========================
