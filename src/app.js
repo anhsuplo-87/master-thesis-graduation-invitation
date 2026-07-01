@@ -20,19 +20,19 @@ export function createApp() {
                     <div class="face back">
 
                         <img
-                        src="/src/assets/back/frame.png"
+                        src="${import.meta.env.BASE_URL}assets/back/frame.png"
                         class="layer"
                         data-depth="10"
                         />
 
                         <img
-                        src="/src/assets/back/bg.png"
+                        src="${import.meta.env.BASE_URL}assets/back/bg.png"
                         class="layer"
                         data-depth="12.5"
                         />
 
                         <img
-                        src="/src/assets/back/detail.png"
+                        src="${import.meta.env.BASE_URL}assets/back/detail.png"
                         class="layer"
                         data-depth="15"
                         />            
@@ -43,67 +43,67 @@ export function createApp() {
                     <div class="face front">
 
                         <img
-                        src="/src/assets/front/frame.png"
+                        src="${import.meta.env.BASE_URL}assets/front/frame.png"
                         class="layer"
                         data-depth="10"
                         />
 
                         <img
-                        src="/src/assets/front/bg.png"
+                        src="${import.meta.env.BASE_URL}assets/front/bg.png"
                         class="layer"
                         data-depth="12.5"
                         />
 
                         <img
-                        src="/src/assets/front/title.png"
+                        src="${import.meta.env.BASE_URL}assets/front/title.png"
                         class="layer"
                         data-depth="15"
                         />
 
                         <img
-                        src="/src/assets/front/time.png"
+                        src="${import.meta.env.BASE_URL}assets/front/time.png"
                         class="layer"
                         data-depth="15"
                         />
 
                         <img
-                        src="/src/assets/front/place.png"
+                        src="${import.meta.env.BASE_URL}assets/front/place.png"
                         class="layer"
                         data-depth="15"
                         />
 
                         <img
-                        src="/src/assets/front/contact.png"
+                        src="${import.meta.env.BASE_URL}assets/front/contact.png"
                         class="layer"
                         data-depth="15"
                         />
 
                         <img
-                        src="/src/assets/front/in_bg.png"
+                        src="${import.meta.env.BASE_URL}assets/front/in_bg.png"
                         class="layer"
                         data-depth="17.5"
                         />
 
                         <img
-                        src="/src/assets/front/cert.png"
+                        src="${import.meta.env.BASE_URL}assets/front/cert.png"
                         class="layer"
                         data-depth="20"
                         />
 
                         <img
-                        src="/src/assets/front/thesis.png"
+                        src="${import.meta.env.BASE_URL}assets/front/thesis.png"
                         class="layer"
                         data-depth="20"
                         />
 
                         <img
-                        src="/src/assets/front/laptop.png"
+                        src="${import.meta.env.BASE_URL}assets/front/laptop.png"
                         class="layer"
                         data-depth="20"
                         />
 
                         <img
-                        src="/src/assets/front/top.png"
+                        src="${import.meta.env.BASE_URL}assets/front/top.png"
                         class="layer"
                         data-depth="20"
                         />
