@@ -1,0 +1,474 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #040507;
+  font-family: sans-serif;
+}
+
+body {
+  position: relative;
+}
+
+/* =========================
+   CRT
+========================= */
+
+.crt {
+  position: fixed;
+  inset: 0;
+
+  z-index: 9999;
+
+  pointer-events: none;
+
+  overflow: hidden;
+
+  opacity: 0.95;
+}
+
+/* RGB split */
+
+.crt::before {
+  content: "";
+
+  position: absolute;
+  inset: -2px;
+
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.12) 0px,
+      rgba(255,255,255,0.12) 1px,
+      transparent 2px,
+      transparent 4px
+    );
+
+  mix-blend-mode: soft-light;
+
+  animation:
+    crtScan 8s linear infinite,
+    crtFlicker 0.12s infinite;
+}
+
+/* Vignette + noise */
+
+.crt::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at center,
+      transparent 55%,
+      rgba(0,0,0,0.65) 100%
+    );
+
+  box-shadow:
+    inset 0 0 120px rgba(0,0,0,0.9);
+
+  opacity: 0.95;
+}
+
+/* fake scan beam */
+
+.crtBeam {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgba(255,255,255,0.05),
+      transparent
+    );
+
+  animation: crtBeam 6s linear infinite;
+}
+
+@keyframes crtScan {
+  from {
+    transform: translateY(0px);
+  }
+
+  to {
+    transform: translateY(6px);
+  }
+}
+
+@keyframes crtFlicker {
+  0% {
+    opacity: 0.92;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes crtBeam {
+  from {
+    transform: translateY(-100%);
+  }
+
+  to {
+    transform: translateY(100%);
+  }
+}
+
+/* =========================
+   PAGE
+========================= */
+
+.page {
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    radial-gradient(
+      circle at center,
+      #1b2030 0%,
+      #090b10 70%
+    );
+}
+
+/* =========================
+   PARTICLES
+========================= */
+
+.particles {
+  position: fixed;
+  inset: 0;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+.pixel-particle {
+  position: absolute;
+
+  width: 4px;
+  height: 4px;
+
+  background: rgba(255,255,255,0.85);
+
+  image-rendering: pixelated;
+
+  box-shadow:
+    0 0 8px rgba(255,255,255,0.4);
+
+  animation:
+    floatParticle linear infinite,
+    blinkParticle 2s ease-in-out infinite;
+}
+
+.pixel-particle:nth-child(3n) {
+  width: 2px;
+  height: 2px;
+}
+
+.pixel-particle:nth-child(4n) {
+  width: 6px;
+  height: 6px;
+}
+
+@keyframes floatParticle {
+  0% {
+    transform:
+      translateY(0px)
+      translateX(0px);
+  }
+
+  25% {
+    transform:
+      translateY(-40px)
+      translateX(20px);
+  }
+
+  50% {
+    transform:
+      translateY(-80px)
+      translateX(-15px);
+  }
+
+  75% {
+    transform:
+      translateY(-120px)
+      translateX(30px);
+  }
+
+  100% {
+    transform:
+      translateY(-180px)
+      translateX(0px);
+  }
+}
+
+@keyframes blinkParticle {
+  0% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.2;
+  }
+}
+
+/* =========================
+   SCENE
+========================= */
+
+.scene {
+  perspective: 2400px;
+}
+
+/* =========================
+   CARD SIZE
+========================= */
+
+.card-wrapper {
+  width: min(82vw, 380px);
+  aspect-ratio: 9 / 16;
+
+  position: relative;
+
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .card-wrapper {
+    width: 76vw;
+  }
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card {
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+  transform-style: preserve-3d;
+
+  /* transition:
+    transform 0.16s ease-out,
+    filter 0.3s ease; */
+
+  transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+
+  image-rendering: pixelated;
+
+  cursor: pointer;
+
+  will-change: transform;
+
+  transform-style: preserve-3d; transform-origin: center center;
+
+  overflow: visible;
+}
+
+/* =========================
+   IDLE FLOAT
+========================= */
+
+.idle-float { 
+  width: 100%; 
+  height: 100%; 
+  transform-style: preserve-3d; 
+  animation: idleFloat 4.5s ease-in-out infinite, breathing 3.5s ease-in-out infinite; 
+}
+
+@keyframes idleFloat {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-12px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes breathing {
+  0% {
+    scale: 1;
+  }
+
+  50% {
+    scale: 1.015;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
+
+/* =========================
+   BUBBLE
+========================= */
+
+.bubble-wrapper { width: 100%; height: 100%; transform-style: preserve-3d; }
+
+/* .card.bubble {
+  animation: bubbleEffect 420ms ease;
+} */
+
+.bubble-wrapper.bubble { animation: bubbleEffect 420ms ease; }
+
+@keyframes bubbleEffect {
+  0% {
+    scale: 1;
+  }
+
+  20% {
+    scale: 1.06 0.94;
+  }
+
+  45% {
+    scale: 0.94 1.08;
+  }
+
+  70% {
+    scale: 1.03 0.97;
+  }
+
+  100% {
+    scale: 1;
+  }
+}
+
+/* =========================
+   FACES
+========================= */
+
+.face {
+  position: absolute;
+  inset: 0;
+
+  overflow: hidden;
+
+  border-radius: 18px;
+
+  backface-visibility: hidden;
+
+  background: #141822;
+
+  isolation: isolate;
+
+  box-shadow:
+    0 0 50px rgba(255,255,255,0.05),
+    0 30px 120px rgba(0,0,0,0.7);
+
+  transform-style: preserve-3d; -webkit-backface-visibility: hidden; backface-visibility: hidden;
+
+  pointer-events: none;
+
+  filter:
+    drop-shadow(0 0 25px rgba(255,255,255,0.08))
+    drop-shadow(0 0 60px rgba(0,0,0,0.7));
+}
+
+.front {
+  transform: rotateY(180deg);
+  transform: rotateY(180deg) translateZ(1px);
+}
+
+/* =========================
+   PIXEL LAYERS
+========================= */
+
+.layer {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  image-rendering: pixelated;
+
+  transition: transform 0.08s ease-out;
+
+  pointer-events: none;
+  user-select: none;
+
+  will-change: transform;
+}
+
+/* =========================
+   SCREEN FX
+========================= */
+
+.face::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      120deg,
+      transparent 20%,
+      rgba(255,255,255,0.08) 50%,
+      transparent 80%
+    );
+
+  transform: translateX(-100%);
+
+  animation: shine 7s linear infinite;
+
+  mix-blend-mode: screen;
+}
+
+.face::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    radial-gradient(
+      circle at top,
+      rgba(255,255,255,0.14),
+      transparent 40%
+    );
+}
+
+@keyframes shine {
+  to {
+    transform: translateX(220%);
+  }
+}
