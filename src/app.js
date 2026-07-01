@@ -4,10 +4,42 @@ export function createApp() {
 
     const base = import.meta.env.BASE_URL;
 
+    // event details used to build "Add to calendar" links for the time hotspot
+    const EVENT = {
+        title: "Lễ Tốt Nghiệp - Bá Lương",
+        location: "Hội trường Nguyễn Văn Đạo, 144 Xuân Thuỷ, Cầu Giấy, Hà Nội",
+        details: "Sự hiện diện của bạn là niềm hạnh phúc của tôi. Rất mong bạn có mặt trong buổi lễ tốt nghiệp này.",
+        // assumes a 2-hour ceremony starting at the printed time; adjust if the actual end time differs
+        startLocal: "20260705T083000",
+        endLocal: "20260705T103000",
+        startOffset: "2026-07-05T08:30:00+07:00",
+        endOffset: "2026-07-05T10:30:00+07:00",
+    };
+
+    function buildCalendarLinks() {
+        const google =
+            "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+            `&text=${encodeURIComponent(EVENT.title)}` +
+            `&dates=${EVENT.startLocal}/${EVENT.endLocal}` +
+            `&details=${encodeURIComponent(EVENT.details)}` +
+            `&location=${encodeURIComponent(EVENT.location)}` +
+            "&ctz=Asia/Ho_Chi_Minh";
+
+        const outlook =
+            "https://outlook.office.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent" +
+            `&subject=${encodeURIComponent(EVENT.title)}` +
+            `&startdt=${encodeURIComponent(EVENT.startOffset)}` +
+            `&enddt=${encodeURIComponent(EVENT.endOffset)}` +
+            `&location=${encodeURIComponent(EVENT.location)}` +
+            `&body=${encodeURIComponent(EVENT.details)}`;
+
+        return { google, outlook };
+    }
+
     // bounding box (as % of card size) of the visible art for each
     // hoverable/clickable layer, measured from the source PNGs
     const HOTSPOTS = [
-        { name: "time", depth: 15, left: 7.6, top: 60.5, width: 84.8, height: 10.6, clickable: false },
+        { name: "time", depth: 15, left: 7.6, top: 60.5, width: 84.8, height: 10.6, clickable: true, action: "calendar" },
         { name: "place", depth: 15, left: 7.6, top: 71.9, width: 84.8, height: 13.3, clickable: true, url: "https://maps.app.goo.gl/DykkSuYtAH812LDj8" },
         { name: "contact", depth: 15, left: 7.6, top: 85.9, width: 84.8, height: 10.2, clickable: true, url: "https://www.instagram.com/baluong.87/" },
         { name: "cert", depth: 20, left: 26.4, top: 41.4, width: 59.7, height: 14.8, clickable: false },
@@ -19,6 +51,12 @@ export function createApp() {
     <div class="crt"></div>
 
     <div class="particles" id="particles"></div>
+
+    <audio id="bgm" loop preload="auto">
+      <source src="${base}audio/bgm.mp3" type="audio/mpeg" />
+    </audio>
+
+    <button class="music-toggle" id="musicToggle" type="button" aria-label="Bật/tắt nhạc nền">&#9834;</button>
 
     <section class="section-card">
       <div class="scene">
@@ -139,6 +177,7 @@ export function createApp() {
                               class="hotspot${h.clickable ? " is-clickable" : ""}"
                               data-target="${h.name}"
                               data-clickable="${h.clickable}"
+                              data-action="${h.action ?? ""}"
                               data-url="${h.url ?? ""}"
                               style="left:${h.left}%; top:${h.top}%; width:${h.width}%; height:${h.height}%;"
                               ></div>`
@@ -155,6 +194,11 @@ export function createApp() {
         </div>
       </div>
     </section>
+
+    <div class="calendar-menu" id="calendarMenu">
+      <a class="calendar-link" id="calendarGoogle" target="_blank" rel="noopener noreferrer">Google Calendar</a>
+      <a class="calendar-link" id="calendarOutlook" target="_blank" rel="noopener noreferrer">Outlook</a>
+    </div>
 
     <section class="section-invite">
       <div class="invite-content">
@@ -256,12 +300,92 @@ export function createApp() {
             hotspot.addEventListener("click", (e) => {
                 e.stopPropagation();
 
+                if (hotspot.dataset.action === "calendar") {
+                    openCalendarMenu(hotspot);
+                    return;
+                }
+
                 const url = hotspot.dataset.url;
 
                 if (url && url !== "#") {
                     window.open(url, "_blank", "noopener,noreferrer");
                 }
             });
+        }
+    });
+
+    /* =========================
+       ADD TO CALENDAR
+    ========================= */
+
+    const calendarMenu = root.querySelector("#calendarMenu");
+    const calendarGoogle = root.querySelector("#calendarGoogle");
+    const calendarOutlook = root.querySelector("#calendarOutlook");
+
+    const calendarLinks = buildCalendarLinks();
+    calendarGoogle.href = calendarLinks.google;
+    calendarOutlook.href = calendarLinks.outlook;
+
+    function openCalendarMenu(hotspot) {
+        const rect = hotspot.getBoundingClientRect();
+
+        calendarMenu.style.left = `${rect.left + rect.width / 2}px`;
+        calendarMenu.style.top = `${rect.bottom + 8}px`;
+
+        calendarMenu.classList.add("is-open");
+    }
+
+    function closeCalendarMenu() {
+        calendarMenu.classList.remove("is-open");
+    }
+
+    document.addEventListener("click", (e) => {
+        if (!calendarMenu.contains(e.target)) closeCalendarMenu();
+    });
+
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeCalendarMenu();
+    });
+
+    calendarMenu.addEventListener("click", (e) => e.stopPropagation());
+
+    /* =========================
+       BACKGROUND MUSIC
+    ========================= */
+
+    const bgm = root.querySelector("#bgm");
+    const musicToggle = root.querySelector("#musicToggle");
+
+    let musicAvailable = true;
+
+    bgm.addEventListener(
+        "error",
+        () => {
+            musicAvailable = false;
+            musicToggle.style.display = "none";
+        },
+        { once: true }
+    );
+
+    function playMusic() {
+        if (!musicAvailable) return;
+
+        bgm.play()
+            .then(() => musicToggle.classList.add("is-playing"))
+            .catch(() => {});
+    }
+
+    document.addEventListener("click", playMusic, { once: true });
+    document.addEventListener("touchstart", playMusic, { once: true });
+
+    musicToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+
+        if (bgm.paused) {
+            playMusic();
+        } else {
+            bgm.pause();
+            musicToggle.classList.remove("is-playing");
         }
     });
 
@@ -281,21 +405,12 @@ export function createApp() {
        PARALLAX
     ========================= */
 
-    wrapper.addEventListener("mousemove", (e) => {
-        const rect = wrapper.getBoundingClientRect();
-
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-
-        const px = (x / rect.width - 0.5) * 2;
-        const py = (y / rect.height - 0.5) * 2;
-
+    function applyParallax(px, py) {
         currentRotateY = px * 10;
         currentRotateX = py * -10;
 
         updateCardTransform();
 
-        // layers
         layers.forEach((layer) => {
             const depth = Number(layer.dataset.depth);
 
@@ -306,18 +421,64 @@ export function createApp() {
       translate(${tx}px, ${ty}px)
     `;
         });
+    }
+
+    function resetParallax() {
+        applyParallax(0, 0);
+    }
+
+    wrapper.addEventListener("mousemove", (e) => {
+        const rect = wrapper.getBoundingClientRect();
+
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const px = (x / rect.width - 0.5) * 2;
+        const py = (y / rect.height - 0.5) * 2;
+
+        applyParallax(px, py);
     });
 
-    wrapper.addEventListener("mouseleave", () => {
-        currentRotateX = 0;
-        currentRotateY = 0;
+    wrapper.addEventListener("mouseleave", resetParallax);
 
-        updateCardTransform();
+    /* =========================
+       PARALLAX (mobile tilt)
+    ========================= */
 
-        layers.forEach((layer) => {
-            layer.style.transform = `translate(0px, 0px)`;
-        });
-    });
+    let tiltBaseline = null;
+
+    function handleDeviceOrientation(e) {
+        if (e.beta === null || e.gamma === null) return;
+
+        if (!tiltBaseline) {
+            tiltBaseline = { beta: e.beta, gamma: e.gamma };
+        }
+
+        const clamp = (v, limit) => Math.max(-limit, Math.min(limit, v));
+
+        const px = clamp(e.gamma - tiltBaseline.gamma, 15) / 15;
+        const py = clamp(e.beta - tiltBaseline.beta, 15) / 15;
+
+        applyParallax(px, py);
+    }
+
+    function enableTilt() {
+        window.addEventListener("deviceorientation", handleDeviceOrientation);
+    }
+
+    function requestTiltPermission() {
+        if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+            DeviceOrientationEvent.requestPermission()
+                .then((state) => {
+                    if (state === "granted") enableTilt();
+                })
+                .catch(() => {});
+        } else if (typeof DeviceOrientationEvent !== "undefined") {
+            enableTilt();
+        }
+    }
+
+    wrapper.addEventListener("touchstart", requestTiltPermission, { once: true });
 
     return root;
 }
