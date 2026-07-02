@@ -632,21 +632,98 @@ export function createApp() {
     wrapper.addEventListener("click", requestTiltPermission);
 
     /* =========================
-       SECTION SCROLL ARROWS
+       SECTION SCROLL ARROWS + SNAP
     ========================= */
 
     const scrollDown = root.querySelector("#scrollDown");
     const scrollUp = root.querySelector("#scrollUp");
     const sectionInvite = root.querySelector(".section-invite");
     const sectionCard = root.querySelector(".section-card");
+    const siteFooter = root.querySelector(".site-footer");
 
-    scrollDown.addEventListener("click", () => {
-        sectionInvite.scrollIntoView({ behavior: "smooth" });
-    });
+    const snapTargets = [sectionCard, sectionInvite, siteFooter];
 
-    scrollUp.addEventListener("click", () => {
-        sectionCard.scrollIntoView({ behavior: "smooth" });
-    });
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const SNAP_DURATION = 900; // ms - slower, gentler than the browser's default smooth scroll
+
+    function easeInOutCubic(t) {
+        return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+
+    let snapAnimationId = null;
+
+    function animateScrollTo(targetY) {
+        cancelAnimationFrame(snapAnimationId);
+
+        if (prefersReducedMotion) {
+            window.scrollTo(0, targetY);
+            return;
+        }
+
+        const startY = window.scrollY;
+        const distance = targetY - startY;
+
+        if (Math.abs(distance) < 1) return;
+
+        const startTime = performance.now();
+
+        function step(now) {
+            const progress = Math.min((now - startTime) / SNAP_DURATION, 1);
+
+            window.scrollTo(0, startY + distance * easeInOutCubic(progress));
+
+            if (progress < 1) {
+                snapAnimationId = requestAnimationFrame(step);
+            } else {
+                snapAnimationId = null;
+            }
+        }
+
+        snapAnimationId = requestAnimationFrame(step);
+    }
+
+    function nearestSnapTarget() {
+        return snapTargets.reduce((closest, el) => {
+            const dist = Math.abs(el.offsetTop - window.scrollY);
+            const closestDist = Math.abs(closest.offsetTop - window.scrollY);
+            return dist < closestDist ? el : closest;
+        });
+    }
+
+    scrollDown.addEventListener("click", () => animateScrollTo(sectionInvite.offsetTop));
+    scrollUp.addEventListener("click", () => animateScrollTo(sectionCard.offsetTop));
+
+    // hand control straight back to the user the moment they scroll again,
+    // instead of fighting our own in-flight snap animation
+    function cancelSnapAnimation() {
+        if (snapAnimationId !== null) {
+            cancelAnimationFrame(snapAnimationId);
+            snapAnimationId = null;
+        }
+    }
+
+    window.addEventListener("wheel", cancelSnapAnimation, { passive: true });
+    window.addEventListener("touchstart", cancelSnapAnimation, { passive: true });
+
+    // custom scroll-snap: replaces the native CSS scroll-snap-type so the
+    // settle animation can use a slower, gentler duration/easing than the
+    // browser's built-in (and rather abrupt) snap behavior
+    let scrollEndTimer = null;
+
+    window.addEventListener(
+        "scroll",
+        () => {
+            if (document.body.classList.contains("intro-lock")) return;
+            if (snapAnimationId !== null) return; // don't fight our own animation
+
+            clearTimeout(scrollEndTimer);
+            scrollEndTimer = setTimeout(() => {
+                animateScrollTo(nearestSnapTarget().offsetTop);
+            }, 130);
+        },
+        { passive: true }
+    );
 
     return root;
 }
