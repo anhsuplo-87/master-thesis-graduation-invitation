@@ -10,10 +10,10 @@ export function createApp() {
         location: "Hội trường Nguyễn Văn Đạo, 144 Xuân Thuỷ, Cầu Giấy, Hà Nội",
         details: "Sự hiện diện của bạn là niềm hạnh phúc của tôi. Rất mong bạn có mặt trong buổi lễ tốt nghiệp này.",
         // assumes a 2-hour ceremony starting at the printed time; adjust if the actual end time differs
-        startLocal: "20260705T083000",
-        endLocal: "20260705T103000",
-        startOffset: "2026-07-05T08:30:00+07:00",
-        endOffset: "2026-07-05T10:30:00+07:00",
+        startLocal: "20260705T093000",
+        endLocal: "20260705T113000",
+        startOffset: "2026-07-05T09:30:00+07:00",
+        endOffset: "2026-07-05T11:30:00+07:00",
     };
 
     function buildCalendarLinks() {
@@ -206,6 +206,8 @@ export function createApp() {
           </div>
         </div>
       </div>
+
+      <button class="scroll-arrow scroll-arrow--down" id="scrollDown" type="button" aria-label="Cuộn xuống phần thư mời">&#9660;</button>
     </section>
 
     <div class="calendar-menu" id="calendarMenu">
@@ -221,7 +223,7 @@ export function createApp() {
         <h3 class="invite-name">Bá Lương</h3>
 
         <div class="invite-details">
-          <p><strong>Thời gian:</strong> 08h30 &bull; Ngày 05/07/2026</p>
+          <p><strong>Thời gian:</strong> 09h30 &bull; Ngày 05/07/2026</p>
           <p><strong>Địa điểm:</strong> Hội trường Nguyễn Văn Đạo<br />(144 Xuân Thuỷ, Cầu Giấy, Hà Nội)</p>
         </div>
 
@@ -232,6 +234,8 @@ export function createApp() {
 
         <p class="invite-signoff">Thân ái.</p>
       </div>
+
+      <button class="scroll-arrow scroll-arrow--up" id="scrollUp" type="button" aria-label="Cuộn lên phần thẻ mời">&#9650;</button>
     </section>
 
     <footer class="site-footer">
@@ -294,11 +298,25 @@ export function createApp() {
         packSfx.play().catch(() => { });
     }
 
-    function bubblePack() {
-        packBubble.classList.remove("is-bubbling");
-        void packBubble.offsetWidth;
-        packBubble.classList.add("is-bubbling");
+    function pressPack() {
+        if (packBusy) return;
+
+        packBubble.classList.remove("is-releasing");
+        packBubble.classList.add("is-pressed");
     }
+
+    function releasePack() {
+        if (!packBubble.classList.contains("is-pressed")) return;
+
+        packBubble.classList.remove("is-pressed");
+        void packBubble.offsetWidth;
+        packBubble.classList.add("is-releasing");
+    }
+
+    packIntro.addEventListener("pointerdown", pressPack);
+    packIntro.addEventListener("pointerup", releasePack);
+    packIntro.addEventListener("pointercancel", releasePack);
+    packIntro.addEventListener("pointerleave", releasePack);
 
     function wobblePack() {
         const angle = (Math.random() * 2 - 1) * 6; // small random tilt, -6deg..6deg
@@ -306,11 +324,10 @@ export function createApp() {
     }
 
     function tearFeedback() {
-        bubblePack();
         wobblePack();
         playPackSfx();
 
-        if (navigator.vibrate) navigator.vibrate(30);
+        if (navigator.vibrate) navigator.vibrate(40);
     }
 
     packIntro.addEventListener("click", () => {
@@ -370,7 +387,7 @@ export function createApp() {
         PIXEL PARTICLES 
     ========================= */
 
-    for (let i = 0; i < 45; i++) {
+    for (let i = 0; i < 80; i++) {
         const p = document.createElement("div");
 
         p.className = "pixel-particle";
@@ -585,19 +602,51 @@ export function createApp() {
         window.addEventListener("deviceorientation", handleDeviceOrientation);
     }
 
+    let tiltEnabled = false;
+
     function requestTiltPermission() {
+        if (tiltEnabled) return;
+
         if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+            // iOS 13+: must be requested directly inside a user-gesture handler;
+            // if the user dismissed the prompt before, keep retrying on every
+            // subsequent tap instead of giving up after the very first one
             DeviceOrientationEvent.requestPermission()
                 .then((state) => {
-                    if (state === "granted") enableTilt();
+                    if (state === "granted") {
+                        tiltEnabled = true;
+                        enableTilt();
+                    }
                 })
                 .catch(() => { });
         } else if (typeof DeviceOrientationEvent !== "undefined") {
+            tiltEnabled = true;
             enableTilt();
         }
     }
 
-    wrapper.addEventListener("touchstart", requestTiltPermission, { once: true });
+    // ask as early as the very first tap (while still tearing open the pack),
+    // and keep asking on the card itself in case that first tap didn't grant it
+    packIntro.addEventListener("pointerdown", requestTiltPermission);
+    wrapper.addEventListener("touchstart", requestTiltPermission);
+    wrapper.addEventListener("click", requestTiltPermission);
+
+    /* =========================
+       SECTION SCROLL ARROWS
+    ========================= */
+
+    const scrollDown = root.querySelector("#scrollDown");
+    const scrollUp = root.querySelector("#scrollUp");
+    const sectionInvite = root.querySelector(".section-invite");
+    const sectionCard = root.querySelector(".section-card");
+
+    scrollDown.addEventListener("click", () => {
+        sectionInvite.scrollIntoView({ behavior: "smooth" });
+    });
+
+    scrollUp.addEventListener("click", () => {
+        sectionCard.scrollIntoView({ behavior: "smooth" });
+    });
 
     return root;
 }
